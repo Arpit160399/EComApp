@@ -6,14 +6,18 @@
 //
 
 import Foundation
+struct ProductData: Codable {
+    let data: [Product]
+}
+
 struct Product: Codable {
-    let id: String
+    let id: Int
     let name: String
     let rating: String?
-    let categoryID: String
-    let imageurl: String
-    let minQuanity: Int
-    let subtext: String
+    let category: Category
+    let logo: String?
+    let minimum_quantity: Int
+    let alias: String
     let price: Float
-    let uints: String
+    let unit: String
 }

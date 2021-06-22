@@ -21,17 +21,16 @@ class TextLabel: UILabel {
         switch type {
         case .Heading:
             self.font = UIFont.systemFont(ofSize: 15, weight: .bold)
-            self.numberOfLines = 0
         case .subtitle:
             self.font = UIFont.systemFont(ofSize: 11, weight: .medium)
             self.textColor = .lightBlack
-            self.numberOfLines = 0
         case .Price:
             self.font = UIFont.systemFont(ofSize: 11, weight: .bold)
         case .Light:
             self.font = UIFont.systemFont(ofSize: 11, weight: .regular)
             self.textColor = .systemGray3
         }
+        self.numberOfLines = 0
     }
 
     func addTag(price: Float,unit: String){

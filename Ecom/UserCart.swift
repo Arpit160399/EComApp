@@ -9,9 +9,9 @@ import Foundation
 class UserCart {
     static var shared = UserCart()
     private let localStoreKey = "user_cart"
-    private var localCopy = [String : Cart]()
+    private var localCopy = [Int : Cart]()
     var valueUpdated: (() -> Void)?
-    private var currentCart = [String : Cart]() {
+    private var currentCart = [Int : Cart]() {
         didSet {
             saveLocaly()
         }
@@ -19,7 +19,7 @@ class UserCart {
     
     init(){
         if let data = UserDefaults.standard.object(forKey: localStoreKey) as? Data {
-            if let cartValue = try? JSONDecoder().decode([String : Cart].self, from: data) {
+            if let cartValue = try? JSONDecoder().decode([Int : Cart].self, from: data) {
                 localCopy = cartValue
                 currentCart = cartValue
             }
@@ -37,7 +37,7 @@ class UserCart {
        currentCart[item.id] = nil
     }
     
-    fileprivate func updatePrice(id: String,price: Float) {
+    fileprivate func updatePrice(id: Int,price: Float) {
         let qunaity = currentCart[id]?.quanity ?? 1
         currentCart[id]?.totalPrice = price * qunaity
     }
@@ -66,7 +66,7 @@ func increaseQunaityOf(item: Product,by: Float) {
         valueUpdated?()
     }
     
-    func getItemBy(id: String) -> Cart? {
+    func getItemBy(id: Int) -> Cart? {
         return currentCart[id]
     }
     

@@ -7,12 +7,10 @@
 
 import UIKit
 
-class CartController: UIViewController,UITableViewDataSource,UITableViewDelegate {
-
-    
+class CartController: UIViewController, UITableViewDataSource, UITableViewDelegate {
     lazy var tabelView = UITableView(frame: view.frame)
     let cell = "CartCell"
-    var products = [Cart]()  {
+    var products = [Cart]() {
         didSet {
             tabelView.reloadData()
         }
@@ -35,9 +33,8 @@ class CartController: UIViewController,UITableViewDataSource,UITableViewDelegate
         UserCart.shared.valueUpdated = setBillingCart
     }
     
-    
     fileprivate func addTabelView() {
-        tabelView.autoresizingMask = [.flexibleHeight,.flexibleWidth]
+        tabelView.autoresizingMask = [.flexibleHeight, .flexibleWidth]
         view.addSubview(tabelView)
         tabelView.backgroundColor = .primaryBackgroundColor
         tabelView.separatorStyle = .none
@@ -58,5 +55,4 @@ class CartController: UIViewController,UITableViewDataSource,UITableViewDelegate
         cell.configCellWith(value: cart)
         return cell
     }
-
 }

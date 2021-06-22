@@ -7,7 +7,7 @@
 
 import UIKit
 
-class PageViewCell: UICollectionViewCell,TempleteCollectioViewCell {
+class PageViewCell: UICollectionViewCell, TempleteCollectioViewCell {
     static var cellIdentiffer: String = "PageViewCell"
     var loaderViewId = "LoaderViewID"
     private let productListCollectionView: UICollectionView = {
@@ -16,21 +16,23 @@ class PageViewCell: UICollectionViewCell,TempleteCollectioViewCell {
         let collectionView = UICollectionView(frame: .zero, collectionViewLayout: flowlayout)
         return collectionView
     }()
+
     let acivityView = UIActivityIndicatorView()
-    var categoryID: String = "0"
+    var categoryID: Int = 0
+    var indexing = 0
     var isloading: Bool = false
-    lazy var dataSource = DataSourceCollectionView<ProductCell,Product>(collection: productListCollectionView, cellSize: { index in
+    lazy var dataSource = DataSourceCollectionView<ProductCell, Product>(collection: productListCollectionView, cellSize: { index in
         let width = (self.productListCollectionView.frame.width - 2) / 2
         let height = self.calculateHeight(index: index.item, width: width)
         return .init(width: width, height: height)
     }, cellData: [])
     fileprivate func addCollectionView() {
         contentView.addSubview(productListCollectionView)
-        productListCollectionView.contentInset = .init(top: 0, left: 0, bottom: 50, right: 0)
+        productListCollectionView.contentInset = .init(top: 0, left: 0, bottom: 60, right: 0)
         productListCollectionView.backgroundColor = .primaryBackgroundColor
         productListCollectionView.addTopAnchor(equal: contentView.topAnchor)
             .addBottomAnchor(equal: contentView.bottomAnchor)
-            .addLeftAnchor(equal:  contentView.leftAnchor)
+            .addLeftAnchor(equal: contentView.leftAnchor)
             .addRightAnchor(equal: contentView.rightAnchor)
         productListCollectionView.dataSource = dataSource
         productListCollectionView.delegate = dataSource
@@ -45,74 +47,79 @@ class PageViewCell: UICollectionViewCell,TempleteCollectioViewCell {
         contentView.addActivityView(activityLoader: acivityView)
     }
     
-
-
+    @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    fileprivate func getproducts(_ id: String,page: Int) {
-        DataSourceProvider.stander.getProductList(ofcategory: id,page: page) { products, error in
+    fileprivate func getproducts(_ id: Int, page: Int) {
+        DataSourceProvider.stander.getProductList(ofcategory: id, page: page) { [weak self] products, error in
+            guard let self = self else {return}
             if error != nil {
                 return
             }
             self.loaderingView(show: false)
             self.isloading = false
-            guard let productlist = products else {return}
+            guard let productlist = products else { return }
             self.dataSource.data.append(contentsOf: productlist)
-            self.contentView.removeAcivityView(activityLoader: self.acivityView)
+            self.indexing += 1
+            if !self.dataSource.data.isEmpty {
+                self.contentView.removeAcivityView(activityLoader: self.acivityView)
+            }
         }
     }
-    
-func configCellWith(value: Any) {
-        if let category = value as?  Category {
+
+    override func draw(_ rect: CGRect) {
+        super.draw(rect)
+        productListCollectionView.reloadData()
+    }
+
+    func configCellWith(value: Any) {
+        if let category = value as? Category {
             categoryID = category.id
-            getproducts(category.id,page: 0)
-           UserCart.shared.valueUpdated = { [weak self] in
-            self?.productListCollectionView.reloadData()
-         }
-       }
+            getproducts(category.id, page: 0)
+        }
     }
     
     private func addLoaderview() {
         dataSource.scrollingAction = collectionViewDidScroll
-        dataSource.addSupllmentaryView = { kind,index  in
+        dataSource.addSupllmentaryView = { [weak self] kind, index in
+            guard let self = self else {return UICollectionReusableView()}
             switch kind {
             case UICollectionView.elementKindSectionFooter:
                 guard let view = self.productListCollectionView.dequeueReusableSupplementaryView(ofKind: kind, withReuseIdentifier: self.loaderViewId, for: index) as? loaderView else {
                     return UICollectionReusableView()
                 }
-              view.activeload.startAnimating()
-              return view
-            default : return UICollectionReusableView()
+                view.addLoadingView(activeload: self.acivityView)
+                return view
+            default: return UICollectionReusableView()
             }
         }
     }
     
     private func loaderingView(show: Bool) {
-        dataSource.supplementFooterSizehandler = { section in
-            return show ? .zero : CGSize(width: self.frame.width, height: 50)
+        show ? acivityView.startAnimating() : acivityView.stopAnimating()
+        dataSource.supplementFooterSizehandler = { _ in
+            show ? .zero : CGSize(width: self.frame.width, height: 50)
         }
     }
     
-    private func calculateHeight(index: Int,width: CGFloat) -> CGFloat {
+    private func calculateHeight(index: Int, width: CGFloat) -> CGFloat {
         let product = dataSource.data[index]
-        let size = CGSize(width: width - 30, height: .infinity)
-        let title = product.name.textSizeReqired(givensize: .init(width: width - 70, height: .infinity), font: .systemFont(ofSize: 15, weight: .bold)).height
-        let subtile = product.subtext.textSizeReqired(givensize: size, font: .systemFont(ofSize: 11, weight: .medium)).height
-        let price = "Rs \(product.price) / \(product.uints)".textSizeReqired(givensize: size, font: .systemFont(ofSize: 11, weight: .bold)).height
-      return 220 + title + subtile + price
+        let widthforTitle = width * 0.36
+        let size = CGSize(width: width - 40, height: .infinity)
+        let title = product.name.textSizeReqired(givensize: .init(width: widthforTitle, height: .infinity), font: .systemFont(ofSize: 15, weight: .bold)).height
+        let subtile = product.alias.textSizeReqired(givensize: size, font: .systemFont(ofSize: 11, weight: .medium)).height
+        let price = "Rs \(product.price) / \(product.unit)".textSizeReqired(givensize: size, font: .systemFont(ofSize: 11, weight: .bold)).height
+        return 215 + title + subtile + price
     }
     
     private func collectionViewDidScroll(scrollView: UIScrollView) {
         let offeset = scrollView.contentOffset.y
-        let index = Int( offeset / productListCollectionView.frame.height )
-        if offeset > productListCollectionView.contentSize.height - scrollView.frame.height  && !isloading {
+        if offeset > productListCollectionView.contentSize.height - scrollView.frame.height, !isloading {
             loaderingView(show: true)
-            getproducts(categoryID, page: index)
+            getproducts(categoryID, page: indexing)
             isloading = true
         }
     }
-    
 }
-

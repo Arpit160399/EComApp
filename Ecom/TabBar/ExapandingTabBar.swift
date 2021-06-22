@@ -48,11 +48,11 @@ class ExapandingTabBar: UIView {
         ])
         createMenuItem(tabItem: tabItem)
     }
-    
+
     private func createMenuItem(tabItem: [TabBarItem]) {
         tabBarItems = []
         widthAnchorCollection = []
-        tabItem.enumerated().forEach { (index,tabItem) in
+        tabItem.enumerated().forEach { index, tabItem in
             let view = createTabItem(item: tabItem)
             view.tag = index
             tabBarItems.append(view)
@@ -64,13 +64,13 @@ class ExapandingTabBar: UIView {
         tabBarView.addSubview(stack)
         stack.translatesAutoresizingMaskIntoConstraints = false
         stack.centerXAnchor.constraint(equalTo: tabBarView.centerXAnchor).isActive = true
-        stack.heightAnchor.constraint(equalToConstant: iconHeingh) .isActive = true
+        stack.heightAnchor.constraint(equalToConstant: iconHeingh).isActive = true
         stack.centerYAnchor.constraint(equalTo: tabBarView.centerYAnchor).isActive = true
         activateTab(activeTab)
     }
-    
+
     private func textWidthReqired(text: String) -> CGFloat {
-        let availableWidth : CGFloat =  ( frame.width/CGFloat(tabBarItems.count) - iconHeingh)
+        let availableWidth: CGFloat = (frame.width/CGFloat(tabBarItems.count) - iconHeingh)
         let frameSize = CGSize(width: availableWidth, height: iconHeingh)
         let neededSize = NSString(string: text).boundingRect(with: frameSize, options: .usesLineFragmentOrigin, attributes: [.font: font], context: nil)
         return neededSize.width
@@ -82,7 +82,7 @@ class ExapandingTabBar: UIView {
         button.imageView?.contentMode = .scaleAspectFit
         button.imageView?.tintColor = .black
         button.titleLabel?.font = font
-        button.layer.cornerRadius =  iconHeingh/2
+        button.layer.cornerRadius = iconHeingh/2
         button.setTitleColor(UIColor.black, for: .normal)
         button.imageEdgeInsets = .init(top: 10, left: 0, bottom: 10, right: 15)
         button.addTarget(self, action: #selector(handelTap(_:)), for: .touchUpInside)
@@ -95,12 +95,12 @@ class ExapandingTabBar: UIView {
     @objc func handelTap(_ sender: UIButton) {
         switchTab(from: activeTab, to: sender.tag)
     }
-    
-    fileprivate func switchTab(from: Int , to: Int){
+
+    fileprivate func switchTab(from: Int, to: Int) {
         deactivateTab(from)
         activateTab(to)
     }
-    
+
     fileprivate func activateTab(_ index: Int) {
         let title = tabItem[index].title
         let newWidth = textWidthReqired(text: title) + iconHeingh + 20
@@ -113,10 +113,10 @@ class ExapandingTabBar: UIView {
             self.layoutIfNeeded()
             self.tabBarItems[index].backgroundColor = self.activeColor
         }, completion: nil)
-        self.makeCurrentTabAction?(index)
+        makeCurrentTabAction?(index)
     }
-    
-    fileprivate func deactivateTab(_ index: Int){
+
+    fileprivate func deactivateTab(_ index: Int) {
         tabBarItems[index].setTitle(nil, for: .normal)
         widthAnchorCollection[index].isActive = false
         widthAnchorCollection[index].constant = iconHeingh
@@ -126,5 +126,4 @@ class ExapandingTabBar: UIView {
             self.tabBarItems[index].backgroundColor = .white
         }, completion: nil)
     }
-    
 }
